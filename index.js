@@ -29,7 +29,8 @@ async function run() {
 
 
     const menuCollection = client.db("tasteTreasureDB").collection("menu");
-    const reviewsCollection = client.db("tasteTreasureDB").collection("reviews")
+    const reviewsCollection = client.db("tasteTreasureDB").collection("reviews");
+    const cartCollection = client.db("tasteTreasureDB").collection("cart");
 
 
 
@@ -48,6 +49,25 @@ async function run() {
     })
 
 
+    //sending items as cart collection
+    app.post('/carts', async (req, res) => {
+      const item = req.body;
+      console.log(item);
+      const result = await cartCollection.insertOne(item);
+      res.send(result);
+    })
+
+    //getting carts
+    app.get('/carts', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    })
 
 
 

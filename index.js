@@ -29,8 +29,18 @@ async function run() {
 
 
     const menuCollection = client.db("tasteTreasureDB").collection("menu");
+    const usersCollection = client.db("tasteTreasureDB").collection(" users");
     const reviewsCollection = client.db("tasteTreasureDB").collection("reviews");
     const cartCollection = client.db("tasteTreasureDB").collection("cart");
+
+
+
+    //users api
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
 
 
 
@@ -71,16 +81,21 @@ async function run() {
 
 
     //delete card
+    // app.delete('/carts/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) }
+    //   const result = await cartCollection.deleteOne(query);
+    //   res.send(result)
+    // })
+
+
+
     app.delete('/carts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await cartCollection.deleteOne(query);
-      res.send(result)
+      res.send(result);
     })
-
-
-
-
 
 
 

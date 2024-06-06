@@ -36,14 +36,47 @@ async function run() {
 
 
     //users api
-    app.post("/users", async (req, res) => {
-      const user = req.body;
-      const result = await usersCollection.insertOne(user);
-      res.send(result);
+
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result)
     })
 
 
 
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email }
+      const existingUser = await usersCollection.findOne(query);
+      console.log('existing user', existingUser);
+      if (existingUser) {
+        return res.send({ message: 'User Already Exist' })
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
+
+    //delete users
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await usersCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    //update users
+
+    app.patch("/users/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        }
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
 
     //geting menu items
     app.get('/menu', async (req, res) => {

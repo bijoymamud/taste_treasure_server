@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+var jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
@@ -34,6 +35,16 @@ async function run() {
     const cartCollection = client.db("tasteTreasureDB").collection("cart");
 
 
+
+    //token 
+    app.post('jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, env.process.JWT_ACCESS_TOKEN, {
+        expiresIn: '10h'
+      })
+
+      rs.send({ token })
+    })
 
     //users api
 

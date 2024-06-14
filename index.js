@@ -8,6 +8,7 @@ const port = process.env.PORT || 5000;
 //middleware
 app.use(cors());
 app.use(express.json());
+const SECRET_KEY = process.env.JWT_ACCESS_TOKEN;
 
 //mongodb Connection
 
@@ -37,14 +38,31 @@ async function run() {
 
 
     //token 
-    app.post('jwt', (req, res) => {
+    app.post('/jwt', (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, env.process.JWT_ACCESS_TOKEN, {
+      const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN, {
         expiresIn: '10h'
       })
 
-      rs.send({ token })
+      res.send({ token })
     })
+
+    // app.post('/jwt', (req, res) => {
+    //   const { email } = req.body;
+
+    //   if (!email) {
+    //     return res.status(400).send('Email is required');
+    //   }
+
+    //   try {
+    //     // Create a token
+    //     const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '10h' });
+    //     res.json({ token });
+    //   } catch (error) {
+    //     console.error('Error generating JWT:', error);
+    //     res.status(500).send('Internal Server Error');
+    //   }
+    // });
 
     //users api
 

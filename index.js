@@ -10,6 +10,24 @@ app.use(cors());
 app.use(express.json());
 const SECRET_KEY = process.env.JWT_ACCESS_TOKEN;
 
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'unauthorized access' });
+  }
+  //bearer token
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: true, message: 'unauthorized access' })
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
+
+
+
 //mongodb Connection
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -47,22 +65,11 @@ async function run() {
       res.send({ token })
     })
 
-    // app.post('/jwt', (req, res) => {
-    //   const { email } = req.body;
-
-    //   if (!email) {
-    //     return res.status(400).send('Email is required');
-    //   }
-
-    //   try {
-    //     // Create a token
-    //     const token = jwt.sign({ email }, SECRET_KEY, { expiresIn: '10h' });
-    //     res.json({ token });
-    //   } catch (error) {
-    //     console.error('Error generating JWT:', error);
-    //     res.status(500).send('Internal Server Error');
-    //   }
-    // });
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, SECRET_KEY, { expiresIn: '10h' })
+      res.send({ token })
+    })
 
     //users api
 
@@ -130,25 +137,21 @@ async function run() {
     })
 
     //getting carts
-    app.get('/carts', async (req, res) => {
+    app.get('/carts', verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
+      }
+
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ error: true, message: 'prohabiden access' })
       }
 
       const query = { email: email };
       const result = await cartCollection.find(query).toArray();
       res.send(result);
     })
-
-
-    //delete card
-    // app.delete('/carts/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) }
-    //   const result = await cartCollection.deleteOne(query);
-    //   res.send(result)
-    // })
 
 
 
